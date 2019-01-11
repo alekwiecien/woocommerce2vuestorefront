@@ -1,39 +1,38 @@
-
 # Introduction
 
-*woocommerce2vuestorefront* indexer is standalone application designed to feed VSF's catalog models with data right from WooCommerce.
+*woocommerce2vuestorefront* is a data bridge that allows you to add all PWA features to your WooCommerce-based online store, including ultra-fast performance, home-screen access, push notifications, offline readiness and many more.
+
+This indexer is a standalone application designed to feed Vue Storefront's catalog models with data right from WooCommerce.
+ 
+Vue Storefront is a standalone PWA storefront, able to connect with WooCommerce through the API, without any changes on the backend. 
 
  ## Vue Storefront demo
  [![See how it works!](https://github.com/DivanteLtd/vue-storefront/raw/master/docs/.vuepress/public/Fil-Rakowski-VS-Demo-Youtube.png)](https://www.youtube.com/watch?v=L4K-mq9JoaQ)
-Sign up for a demo at https://vuestorefront.io/ (Vue Storefront integrated with Pimcore, Magento2, WooCommerce ...).
+Sign up for a dedicated demo with the Vue Storefront team at https://vuestorefront.io/
 
-You should install Vue Storefront prior to use this indexer (which is feeding the Vue Storefront datbase). [Read the installation guide](https://divanteltd.github.io/vue-storefront/guide/installation/linux-mac.html).
+# Preparation 
+Prior to using the *woocommerce2vuestorefront* indexer (which feeds the Vue Storefront database), you should install Vue Storefront. 
+[Read the installation guide](https://divanteltd.github.io/vue-storefront/guide/installation/linux-mac.html).
 
 # WooCommerce indexer
-This project provides an indexer for *WooCommerce* data structures
-
-The module is a standalone application that:
-- does process and index: attributes, products and categories to Elasticsearch Search Engine (VSF Catalog model)
+This project provides an indexer for *WooCommerce* data structures. The module is a standalone application that processes and indexes attributes, products, and categories for Elasticsearch Search Engine (Vue Storefront catalog model).
 
 # Setup and installation
 ## Requirements 
 - Node.js 8.2 or higher
-- Running Elasticsearch 5.6+ (It's contained in whole VSF API stack)
+- Running Elasticsearch 5.6+ (it's contained in the whole Vue Storefront API stack)
 - Running WooCommerce (tested on version 3.5.3)
 
-
 ## Pre-configuration on WooCommerce side
-1. Make sure you have configured REST API properly, and the REST API is publicly accessible
-2. Generate *consumer key* and *consumer secret* in advenced tab in WooCommerce settings (read only permissions are sufficient)
-3. Having already installed VSF API, you should build an index with proper mapping for each type, you can achive this by
-running at the VSF API project's root dir:
+1. Make sure that you have configured the REST API properly, and that the REST API is publicly accessible
+2. Generate *consumer key* and *consumer secret* in the “advanced” tab in the WooCommerce settings (*read only* permissions are sufficient)
+3. Having already installed the Vue Storefront API, you should build an index with a proper mapping for each type, you can achieve this by running the following command in the Vue Storefront API root directory:
 `
 nodejs scripts/db.js new
 `
 
-
 ## Configure WooCommerce REST API connection
-In `config.js` there is a *woo* section when you should adjust some data, i.e. keys for REST requests:
+In `config.js` there is a *woo* section where you should adjust some data, i.e. keys for REST requests:
 ```
 woo: {
     api: {
@@ -47,11 +46,11 @@ woo: {
     }
   },
 ```
-> notice that version should stay the same.
+> NOTICE: the *version* should stay the same.
 
 ## Configure Elasticsearch connection
 
-In `db` section contained in `config.js` file you should adjust some info about ES:
+In the `db` section contained in the `config.js` file, you should adjust some info about Elasticsearch:
 ```
   db: {
     host: 'localhost',
@@ -61,7 +60,7 @@ In `db` section contained in `config.js` file you should adjust some info about 
     indexName: 'vue_storefront_catalog'
   },
 ```
-> notice that indexName can be changed but it should stay consistent with VSF configuration. 
+> NOTICE: the indexName can be changed but it should stay consistent with the Vue Storefront configuration. 
 
 # Populate WooCommerce data in Elasticsearch
 
@@ -81,41 +80,39 @@ and that's it.
 
 ## Run Wordpress with WooCommerce included (dockerized)
 
-To simplify the development process You may want to use one of existing tools, for instance: ready-to-use docker images and `wp-cli`:
+To simplify the development process, you may want to use one of the existing tools, for instance: ready-to-use docker images and `wp-cli`:
 
-1. run containers by using `docker-compose.dev.yml` located in `dev/docker/` subdirectory: `docker-compose -f docker-compose.dev.yml up`
-> it's recommended to run this command being inside `docker` dir, because of docker's networking naming conventions which will be used in further steps
+1. run containers by using `docker-compose.dev.yml` located in the `dev/docker/` subdirectory: `docker-compose -f docker-compose.dev.yml up`
+> it's recommended to run this command from inside the `docker` dir, because of docker's networking naming conventions, which will be used in further steps.
 
-2. install Wordpress fresh instance: `docker run -it --rm --volumes-from vsf_woo --network docker_default wordpress:cli wp core install --url="localhost" --title="VSFvsWoo" --admin_user="admin" --admin_email="developer@company.com" --admin_password=admin`
-> notice what parameters should be passed with command above: network and volumes-from should cover names set in docker-compose.dev.yml
-> it creates a new wordpress's instance available on `localhost` and with credentials `admin`/`admin`
+2. install a fresh Wordpress instance: `docker run -it --rm --volumes-from vsf_woo --network docker_default wordpress:cli wp core install --url="localhost" --title="VSFvsWoo" --admin_user="admin" --admin_email="developer@company.com" --admin_password=admin`
+> notice what parameters should be passed with the above 	command: network and volumes-from should cover names set in docker-compose.dev.yml
+> it creates a new wordpress instance, available on `localhost` and with credentials `admin`/`admin`
 
-3. install woocommerce plugin via wp-cli: `docker run -it --rm --volumes-from vsf_woo --network docker_default wordpress:cli wp plugin install woocommerce --activate`
+3. install the WooCommerce plugin via wp-cli: `docker run -it --rm --volumes-from vsf_woo --network docker_default wordpress:cli wp plugin install woocommerce --activate`
 
-4. add some attributes and options, running:
+4. add some attributes and options, by running:
 ```
    docker run -it --rm --volumes-from vsf_woo --network docker_default wordpress:cli wp wc product_attribute create --name=Size --type=options --user=admin
    docker run -it --rm --volumes-from vsf_woo --network docker_default wordpress:cli wp wc product_attribute_term create 1 --name=XS --user=admin
    docker run -it --rm --volumes-from vsf_woo --network docker_default wordpress:cli wp wc product_attribute_term create 1 --name=L --user=admin
 ```
-> wp-cli command `wc product_attribute_term create` requires as a first input an ID of attribute created at first step (in this case `1`)
-5. add some products via cli or manually in wp-admin panel: 
+> wp-cli command `wc product_attribute_term create` requires, as a first input, the ID of the attribute created during the first step (in this case `1`)
+5. add some products via cli, or manually in wp-admin panel: 
 ```
 docker run -it --rm --volumes-from vsf_woo --network docker_default wordpress:cli wp wc product create --name="Vue T-Shirt L" --type=simple --sku=VUE/T-shirt/L --regular_price=200 --user=admin --sale_price=150 --stock_quantity=94 --in_stock=true
 ```
 
-> always pay attention to the arguments provided in commands above which can vary depending on WP/WooCommerce current state.
+> always pay attention to the arguments provided in the commands above, as they can vary depending on the Wordpress/WooCommerce current state.
 
 # Credits
-
-This module has been initially created by Divante's team:
+The woocommerce2vuestorefront module has been created by Divante's team, the core partner of Vue Storefront, including:
 - Maciej Kucmus - @mkucmus
 
 # Support
-
-If You have any questions regarding this project feel free to contact us:
-- [E-mail](mailto:contributors@vuestorefront.io),
+If you have any questions regarding this project, feel free to contact us:
+- [E-mail](mailto:contributors@vuestorefront.io)
 - [Slack](http://slack.vuestorefront.io)
 
 # Licence 
-woocommerce2vuestorefront source code is completely free and released under the [MIT License](https://github.com/DivanteLtd/vue-storefront/blob/master/LICENSE).
+The woocommerce2vuestorefront source code is completely free and released under the [MIT License](https://github.com/DivanteLtd/vue-storefront/blob/master/LICENSE).
